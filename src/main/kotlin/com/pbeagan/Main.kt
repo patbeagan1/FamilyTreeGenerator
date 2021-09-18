@@ -9,7 +9,10 @@ fun main() {
         maleNames,
         femaleNames,
         surnames,
-        Random(432)
+        Random(
+            23223
+//        23942
+        )
     )
     val me = IPerson.Male(Person(
         nameFirst = "ME",
@@ -21,6 +24,10 @@ fun main() {
     personProvider.generateDescendants(me, 4)
     val familyText = me.generateGraph(3)
     writeToFile(familyText, File("family.dot"))
+    val process = ProcessBuilder("./generateImage.sh").start()
+    process.errorStream.reader(Charsets.UTF_8).use {
+        println(it.readText())
+    }
 }
 
 private fun writeToFile(familyText: String, file: File) {

@@ -1,6 +1,7 @@
 package com.pbeagan
 
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.abs
 import kotlin.random.Random
 
 class PersonProvider(
@@ -17,9 +18,9 @@ class PersonProvider(
 
     fun randomMale(params: Params = Default): IPerson.Male {
         val person = Person(
-            "${idGen()} ${commonNameListMale.random()}",
-            commonNameListMale.random(),
-            surnameList.random()
+            "${idGen()} ${commonNameListMale.random(random)}",
+            commonNameListMale.random(random),
+            surnameList.random(random)
         )
         return IPerson.Male(person.apply {
             when (params) {
@@ -31,9 +32,9 @@ class PersonProvider(
 
     fun randomFemale(params: Params = Default): IPerson.Female {
         val person = Person(
-            "${idGen()} ${commonNameListFemale.random()}",
-            commonNameListFemale.random(),
-            surnameList.random()
+            "${idGen()} ${commonNameListFemale.random(random)}",
+            commonNameListFemale.random(random),
+            surnameList.random(random)
         )
         return IPerson.Female(
             person.apply {
@@ -69,7 +70,7 @@ class PersonProvider(
         parent2.union = union
 
         union.apply {
-            repeat(1 + (random.nextInt() % 3) + (random.nextInt() % 3)) {
+            repeat(getChildNumber().also { println(it) }) {
                 children += randomUnisex().apply {
                     nameLast = parent1.nameLast
                     parentUnion = union
@@ -78,6 +79,14 @@ class PersonProvider(
         }
 
         union.children.forEach { this.generateDescendants(it, depth) }
+    }
+
+    private fun getChildNumber(): Int {
+        // output (1d2-1)+(1d2-1)+(1d3-1)
+        // https://anydice.com
+        return (abs(random.nextInt()) % 2) +
+                (abs(random.nextInt()) % 2) +
+                (abs(random.nextInt()) % 3)
     }
 
     fun generateDescendants(person: IPerson, depth: Int) {
