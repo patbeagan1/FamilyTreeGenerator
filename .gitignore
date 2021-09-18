@@ -1,3 +1,10 @@
+family.dot
+out.jpg
+
+#####
+# Gradle ignore ↓
+#####
+
 .gradle
 **/build/
 !src/**/build/

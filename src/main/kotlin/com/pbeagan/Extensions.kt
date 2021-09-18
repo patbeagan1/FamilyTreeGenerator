@@ -2,8 +2,9 @@ package com.pbeagan
 
 fun String.wrapQuote() = "\"" + this + "\""
 
-fun IPerson.generateGraph(depth: Int) {
-    println("digraph {")
+fun IPerson.generateGraph(depth: Int): String {
+    val out = StringBuilder()
+    out.append("digraph {")
     val connections = mutableSetOf<String>()
     val onUnionFound: (IPerson, Union) -> Unit = { person, union ->
         connections.add("${union.parent1.dotName()} -> ${union.dotName()}")
@@ -20,6 +21,7 @@ fun IPerson.generateGraph(depth: Int) {
             connections.add("${union.dotName()} -> ${it.dotName()}")
         }
     }
-    connections.forEach { println(it) }
-    println("}")
+    connections.forEach { out.append(it) }
+    out.append("}")
+    return out.toString()
 }

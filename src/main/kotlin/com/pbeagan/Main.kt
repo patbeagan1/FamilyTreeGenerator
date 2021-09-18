@@ -1,5 +1,7 @@
 package com.pbeagan
 
+import java.io.File
+import java.io.FileNotFoundException
 import kotlin.random.Random
 
 fun main() {
@@ -17,7 +19,22 @@ fun main() {
 
     personProvider.generateAncestors(me, 4)
     personProvider.generateDescendants(me, 4)
-    me.generateGraph(3)
+    val familyText = me.generateGraph(3)
+    writeToFile(familyText, File("family.dot"))
+}
+
+private fun writeToFile(familyText: String, file: File) {
+    val onFail: (Throwable) -> Unit = {
+        println("Sorry, could not write to file!\n" +
+                "Failed with: $it")
+    }
+    try {
+        file.writeText(familyText)
+    } catch (e: FileNotFoundException) {
+        onFail(e)
+    } catch (e: SecurityException) {
+        onFail(e)
+    }
 }
 
 private val maleNames = listOf(
