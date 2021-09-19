@@ -1,4 +1,6 @@
-package com.pbeagan
+package com.pbeagan.entities
+
+import com.pbeagan.providers.DotnameProvider
 
 interface IPerson : DotnameProvider {
     val nameFirst: String

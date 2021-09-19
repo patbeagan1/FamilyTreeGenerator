@@ -1,5 +1,10 @@
-package com.pbeagan
+package com.pbeagan.providers
 
+import com.pbeagan.providers.PersonProvider.RandPersonParams.Default
+import com.pbeagan.providers.PersonProvider.RandPersonParams.WithFamily
+import com.pbeagan.entities.IPerson
+import com.pbeagan.entities.Person
+import com.pbeagan.entities.Union
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.abs
 import kotlin.random.Random
@@ -9,28 +14,29 @@ class PersonProvider(
     private val commonNameListFemale: List<String>,
     private val surnameList: List<String>,
     private val random: Random,
+    private val shouldGenInLawFamily: Boolean = true,
 ) {
     private val atomicInteger = AtomicInteger()
     private fun idGen() = atomicInteger.getAndAdd(1).toString()
 
-    fun randomUnisex(params: Params = Default) =
-        if (random.nextBoolean()) randomMale(params) else randomFemale(params)
+    private fun randomUnisex(randPersonParams: RandPersonParams = Default) =
+        if (random.nextBoolean()) randomMale(randPersonParams) else randomFemale(randPersonParams)
 
-    fun randomMale(params: Params = Default): IPerson.Male {
+    private fun randomMale(randPersonParams: RandPersonParams = Default): IPerson.Male {
         val person = Person(
             "${idGen()} ${commonNameListMale.random(random)}",
             commonNameListMale.random(random),
             surnameList.random(random)
         )
         return IPerson.Male(person.apply {
-            when (params) {
+            when (randPersonParams) {
                 Default -> Unit
-                is WithFamily -> generateAncestors(person, params.depth)
+                is WithFamily -> generateAncestors(person, randPersonParams.depth)
             }
         })
     }
 
-    fun randomFemale(params: Params = Default): IPerson.Female {
+    private fun randomFemale(randPersonParams: RandPersonParams = Default): IPerson.Female {
         val person = Person(
             "${idGen()} ${commonNameListFemale.random(random)}",
             commonNameListFemale.random(random),
@@ -38,9 +44,9 @@ class PersonProvider(
         )
         return IPerson.Female(
             person.apply {
-                when (params) {
+                when (randPersonParams) {
                     Default -> Unit
-                    is WithFamily -> generateAncestors(person, params.depth)
+                    is WithFamily -> generateAncestors(person, randPersonParams.depth)
                 }
             }
         )
@@ -70,7 +76,7 @@ class PersonProvider(
         parent2.union = union
 
         union.apply {
-            repeat(getChildNumber().also { println(it) }) {
+            repeat(randChildCount()) {
                 children += randomUnisex().apply {
                     nameLast = parent1.nameLast
                     parentUnion = union
@@ -81,23 +87,29 @@ class PersonProvider(
         union.children.forEach { this.generateDescendants(it, depth) }
     }
 
-    private fun getChildNumber(): Int {
+    private fun randChildCount(): Int {
         // output (1d2-1)+(1d2-1)+(1d3-1)
         // https://anydice.com
+        // 2 is most common. Between [0, 4]
         return (abs(random.nextInt()) % 2) +
                 (abs(random.nextInt()) % 2) +
                 (abs(random.nextInt()) % 3)
     }
 
     fun generateDescendants(person: IPerson, depth: Int) {
+        val params = if (shouldGenInLawFamily) {
+            WithFamily(depth - 1)
+        } else {
+            Default
+        }
         when (person) {
             is IPerson.Male -> generateDescendants(
                 person,
-                randomFemale(WithFamily(depth - 1)),
+                randomFemale(params),
                 depth - 1
             )
             is IPerson.Female -> generateDescendants(
-                randomMale(WithFamily(depth - 1)),
+                randomMale(params),
                 person,
                 depth - 1
             )
@@ -105,7 +117,8 @@ class PersonProvider(
         }
     }
 
-    sealed class Params
-    object Default : Params()
-    class WithFamily(val depth: Int) : Params()
+    sealed class RandPersonParams {
+        object Default : RandPersonParams()
+        class WithFamily(val depth: Int) : RandPersonParams()
+    }
 }

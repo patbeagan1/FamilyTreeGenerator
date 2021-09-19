@@ -1,4 +1,6 @@
-package com.pbeagan
+package com.pbeagan.entities
+
+import com.pbeagan.providers.DotnameProvider
 
 class Union(
     val parent1: IPerson.Male,

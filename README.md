@@ -18,6 +18,12 @@ You'll need `graphviz` for this. If you are on mac you can just do `brew install
 The generated image should look something like this: 
 ![sample image](./art/sample.jpg)
 
+You also have the opportunity to generate trees with and without in-laws:
+
+| With Inlaws | Without Inlaws |
+|-|-|
+|![sample image](./art/simpleSampleWithInlaw.jpg)|![sample image](./art/simpleSampleWithoutInlaw.jpg)|
+
 ---
 
 ### How can I change the names? 

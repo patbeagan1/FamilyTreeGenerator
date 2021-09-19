@@ -1,4 +1,4 @@
-package com.pbeagan
+package com.pbeagan.entities
 
 data class Person(
     override val nameFirst: String,
