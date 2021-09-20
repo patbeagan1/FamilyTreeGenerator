@@ -1,16 +1,14 @@
-import com.pbeagan.ExternalProcessManager
 import com.pbeagan.IExternalProcessManager
 import com.pbeagan.Runtime
 import com.pbeagan.entities.IPerson
 import com.pbeagan.entities.Person
-import com.pbeagan.io.FileManager
 import com.pbeagan.io.IFileManager
 import com.pbeagan.io.Printer
 import com.pbeagan.providers.PersonProvider
+import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.File
 import kotlin.random.Random
-import kotlin.test.assertEquals
 
 internal class MainKtTest {
     @Test

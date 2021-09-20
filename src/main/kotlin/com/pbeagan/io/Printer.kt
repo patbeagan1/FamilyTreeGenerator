@@ -9,10 +9,9 @@ interface IPrinter {
 }
 
 class Printer : IPrinter {
-
     override fun printProcessError(process: Process): Process {
         process.errorStream.reader(Charsets.UTF_8).use { reader ->
-            println(reader.readText())
+            print(reader.readText())
         }
         return process
     }

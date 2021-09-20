@@ -1,0 +1,54 @@
+plugins {
+    id "org.jetbrains.kotlin.jvm" version "1.5.30"
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+sourceSets {
+    main.kotlin.srcDirs += 'src/main/kotlin'
+    main.java.srcDirs += 'src/main/java'
+}
+
+// region dependencies
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'junit:junit:4.12'
+}
+
+// endregion
+
+tasks.test {
+    useJUnit()
+}
+
+tasks.test {
+    useJUnit()
+}
+
+tasks.withType(Jar) {
+    duplicatesStrategy = DuplicatesStrategy.INHERIT
+}
+
+// region fatjar
+
+group = "me.pbeagan"
+version = "1.0-SNAPSHOT"
+
+task buildMainJar(type: Jar) {
+    archiveBaseName.set("FamilyTreeGenerator")
+    exclude("META-INF/versions/9/module-info.class")
+    manifest {
+        attributes "Main-Class": "com.pbeagan.MainKt"
+    }
+
+    from { configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+// endregion
+
