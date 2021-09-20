@@ -10,15 +10,25 @@ Family trees have always seemed like a fun data structure, so I wanted to play a
 
 You'll need `graphviz` for this. If you are on mac you can just do `brew install graphviz`.
 
-### What does the output look like? 
+### How do I use it? 
 
-1. If you run the `main` function, you'll get a family.dot file generated in the top level of the repo. 
-2. Running `generateImage.sh` will generate an image for the dotfile, and open it. 
+1. Download the latest release from here: https://github.com/patbeagan1/FamilyTreeGenerator/releases
+1. Ensure that the following files are present in the directory that you are running the application from:
+    - `./namesFemale.txt`
+    - `./namesMale.txt`
+    - `./namesLast.txt`
+1. Populate each name<>.txt files with a single name per line. You can see an example in the top level of this repo, [here](./namesFemale.txt). Lines can be commented out by starting the line with a "#".
+1. Run the application with `java -jar <filename>.jar`. This will do the following: 
+    1. You'll get a `family.dot` file generated in the top level of the repo. 
+    1. As long as `graphviz` is installed, it will convert the dot file into a JPG called `out.jpg` in the top level of the repo
+    1. As long as your OS knows the `open` command, the `out.jpg` file will be opened. 
+
+### What does the output look like? 
 
 The generated image should look something like this: 
 ![sample image](./art/sample.jpg)
 
-You also have the opportunity to generate trees with and without in-laws:
+If you download the code, you'll also have the opportunity to generate trees with and without in-laws, in the `Runtime` class:
 
 | With Inlaws | Without Inlaws |
 |-|-|
