@@ -22,45 +22,50 @@ class Printer : IPrinter {
         val out = StringBuilder()
         out.append("digraph {")
         val connections = mutableSetOf<String>()
-        val onUnionFound: (IPerson, Union) -> Unit = { localPerson, union ->
-            connections.registerStyles(union)
-            connections.addParents(union)
-            connections.addChild(union, localPerson)
-        }
-        person.searchAncestors(depth, onUnionFound)
-        person.searchDescendants(depth) { union ->
-            union.parent1.searchAncestors(depth, onUnionFound)
-            union.parent2.searchAncestors(depth, onUnionFound)
-            connections.registerStyles(union)
-            connections.addParents(union)
-            union.children.forEach {
-                connections.addChild(union, it)
-            }
-        }
+
+        findAncestorsAndCousins(person, depth, connections)
+        findDescendantsAndInlaws(person, depth, connections)
+
         connections.forEach { out.append(it) }
         out.append("}")
         return out.toString()
     }
 
-    private fun MutableSet<String>.registerStyles(union: Union) {
-        add("${union.dotName()} [shape=\"rectangle\" color=\"green\"]")
+    private fun findDescendantsAndInlaws(
+        person: IPerson,
+        depth: Int,
+        connections: MutableSet<String>,
+    ) {
+        person.searchDescendants(IPerson.DescendantSearchParams(depth) { union ->
+            renderInto(connections)(union)
+            findAncestorsAndCousins(union.parent1, depth, connections)
+            findAncestorsAndCousins(union.parent2, depth, connections)
+        })
+    }
+
+    private fun findAncestorsAndCousins(
+        person: IPerson,
+        depth: Int,
+        connections: MutableSet<String>,
+    ) {
+        person.searchAncestors(
+            IPerson.DescendantSearchParams(depth, renderInto(connections)),
+            IPerson.AncestorSearchParams(depth, renderInto(connections))
+        )
+    }
+
+    private fun renderInto(connections: MutableSet<String>): (Union) -> Unit = { union ->
+        connections.add("${union.dotName()} [shape=\"rectangle\" color=\"green\"]")
         (union.children + union.parent1 + union.parent2).forEach { person ->
             when (person) {
-                is Male -> add("${person.dotName()} [shape=\"ellipse\" color=\"blue\"]")
-                is Female -> add("${person.dotName()} [shape=\"ellipse\" color=\"red\"]")
+                is Male -> connections.add("${person.dotName()} [shape=\"ellipse\" color=\"blue\"]")
+                is Female -> connections.add("${person.dotName()} [shape=\"ellipse\" color=\"red\"]")
             }
         }
-    }
-
-    private fun MutableSet<String>.addChild(
-        union: Union,
-        person: IPerson,
-    ) {
-        add("${union.dotName()} -> ${person.dotName()}")
-    }
-
-    private fun MutableSet<String>.addParents(union: Union) {
-        add("${union.parent1.dotName()} -> ${union.dotName()}")
-        add("${union.parent2.dotName()} -> ${union.dotName()}")
+        connections.add("${union.parent1.dotName()} -> ${union.dotName()}")
+        connections.add("${union.parent2.dotName()} -> ${union.dotName()}")
+        union.children.forEach {
+            connections.add("${union.dotName()} -> ${it.dotName()}")
+        }
     }
 }

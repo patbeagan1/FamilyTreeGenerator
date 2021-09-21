@@ -5,49 +5,90 @@ import com.pbeagan.entities.Person
 import com.pbeagan.io.FileManager
 import com.pbeagan.io.Printer
 import com.pbeagan.providers.PersonProvider
+import com.pbeagan.providers.RandomPersonProvider
 import org.junit.Test
 import kotlin.random.Random
 
 internal class MainKtVisualizationTest {
-    /**
-     * Output should be [/art/simpleSampleWithInlaw.jpg]
-     */
+    private val person = Person(
+        "0000",
+        "0000",
+        "0000"
+    )
+
     @Test
     fun `test simple graph, with inlaws`() {
         generateSimpleGraph(
-            PersonProvider(
+            PersonProvider(RandomPersonProvider(
+                Random(23223),
                 listOf("MA", "MB", "MC", "MD", "ME", "MF"),
                 listOf("Fa", "Fb", "Fc", "Fd", "Fe", "Ff"),
-                listOf("Z", "Y", "X", "W", "V", "U", "T"),
-                Random(23223),
-                true
-            ),
+                listOf("Z", "Y", "X", "W", "V", "U", "T")
+            )),
             Runtime.Params(
-                IPerson.Male(Person("ME", "ME", "ME")),
-                2,
-                3,
-                2
+                IPerson.Male(person),
+                ancestorDepth = 1,
+                descendantDepth = 2,
+                graphDepth = 2,
+                shouldGenCousins = false,
+                shouldGenInlaws = true
             ))
     }
 
-    /**
-     * Output should be [/art/simpleSampleWithoutInlaw.jpg]
-     */
     @Test
-    fun `test simple graph, without inlaws`() {
+    fun `test simple graph, with cousins`() {
         generateSimpleGraph(
-            PersonProvider(
+            PersonProvider(RandomPersonProvider(
+                Random(2224),
+                listOf("MA", "MB", "MC", "MD", "ME", "MF"),
+                listOf("Fa", "Fb", "Fc", "Fd", "Fe", "Ff"),
+                listOf("Z", "Y", "X", "W", "V", "U", "T")
+            )),
+            Runtime.Params(
+                IPerson.Male(person),
+                ancestorDepth = 2,
+                descendantDepth = 2,
+                graphDepth = 5,
+                shouldGenCousins = true,
+                shouldGenInlaws = false
+            ))
+    }
+
+    @Test
+    fun `test simple graph, no inlaws or cousins`() {
+        generateSimpleGraph(
+            PersonProvider(RandomPersonProvider(
+                Random(23223),
                 listOf("MA", "MB", "MC", "MD", "ME", "MF"),
                 listOf("Fa", "Fb", "Fc", "Fd", "Fe", "Ff"),
                 listOf("Z", "Y", "X", "W", "V", "U", "T"),
-                Random(23223),
-                false
-            ),
+            )),
             Runtime.Params(
-                IPerson.Male(Person("ME", "ME", "ME")),
-                2,
-                3,
-                2
+                IPerson.Male(person),
+                ancestorDepth = 2,
+                descendantDepth = 2,
+                graphDepth = 2,
+                shouldGenCousins = false,
+                shouldGenInlaws = false
+            ))
+    }
+
+    @Test
+    fun `test simple graph, with inlaws and cousins`() {
+        generateSimpleGraph(
+            PersonProvider(RandomPersonProvider(
+                Random(23223),
+                listOf("MA", "MB", "MC", "MD", "ME", "MF"),
+                listOf("Fa", "Fb", "Fc", "Fd", "Fe", "Ff"),
+                listOf("Z", "Y", "X", "W", "V", "U", "T"),
+            )),
+            Runtime.Params(
+                IPerson.Male(person),
+                ancestorDepth = 2,
+                descendantDepth = 2,
+                graphDepth = 10,
+                shouldGenCousins = true,
+                shouldGenInlaws = true
             ))
     }
 

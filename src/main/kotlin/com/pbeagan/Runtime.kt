@@ -13,8 +13,10 @@ class Runtime(
     private val externalProcessManager: IExternalProcessManager,
 ) {
     fun run(params: Params) = params.run {
-        personProvider.generateAncestors(sourcePerson, ancestorDepth)
-        personProvider.generateDescendants(sourcePerson, descendantDepth)
+        personProvider.apply {
+            generateAncestors(sourcePerson, params.shouldGenCousins, ancestorDepth)
+            generateDescendants(sourcePerson, params.shouldGenInlaws, descendantDepth)
+        }
 
         fileManager.writeToFile(
             printer.generateGraph(sourcePerson, graphDepth),
@@ -29,6 +31,8 @@ class Runtime(
         val ancestorDepth: Int,
         val descendantDepth: Int,
         val graphDepth: Int,
+        val shouldGenCousins: Boolean,
+        val shouldGenInlaws: Boolean,
     )
 }
 

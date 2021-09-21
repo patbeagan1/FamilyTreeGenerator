@@ -1,124 +1,67 @@
 package com.pbeagan.providers
 
-import com.pbeagan.providers.PersonProvider.RandPersonParams.Default
-import com.pbeagan.providers.PersonProvider.RandPersonParams.WithFamily
 import com.pbeagan.entities.IPerson
-import com.pbeagan.entities.Person
-import com.pbeagan.entities.Union
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.abs
-import kotlin.random.Random
+import com.pbeagan.entities.formUnion
 
 class PersonProvider(
-    private val commonNameListMale: List<String>,
-    private val commonNameListFemale: List<String>,
-    private val surnameList: List<String>,
-    private val random: Random,
-    private val shouldGenInLawFamily: Boolean = true,
+    private val randomPersonProvider: RandomPersonProvider,
 ) {
-    private val atomicInteger = AtomicInteger()
-    private fun idGen() = atomicInteger.getAndAdd(1).toString()
-
-    private fun randomUnisex(randPersonParams: RandPersonParams = Default) =
-        if (random.nextBoolean()) randomMale(randPersonParams) else randomFemale(randPersonParams)
-
-    private fun randomMale(randPersonParams: RandPersonParams = Default): IPerson.Male {
-        val person = Person(
-            "${idGen()} ${commonNameListMale.random(random)}",
-            commonNameListMale.random(random),
-            surnameList.random(random)
-        )
-        return IPerson.Male(person.apply {
-            when (randPersonParams) {
-                Default -> Unit
-                is WithFamily -> generateAncestors(person, randPersonParams.depth)
-            }
-        })
-    }
-
-    private fun randomFemale(randPersonParams: RandPersonParams = Default): IPerson.Female {
-        val person = Person(
-            "${idGen()} ${commonNameListFemale.random(random)}",
-            commonNameListFemale.random(random),
-            surnameList.random(random)
-        )
-        return IPerson.Female(
-            person.apply {
-                when (randPersonParams) {
-                    Default -> Unit
-                    is WithFamily -> generateAncestors(person, randPersonParams.depth)
-                }
+    fun generateAncestors(person: IPerson, shouldGenCousins: Boolean, depth: Int) {
+        if (depth <= 0) return
+        val union = formUnion(
+            randomPersonProvider.randomMale().also {
+                it.nameLast = person.nameLast
+                generateAncestors(it, shouldGenCousins, depth - 1)
+            },
+            randomPersonProvider.randomFemale().also {
+                generateAncestors(it, shouldGenCousins, depth - 1)
             }
         )
-    }
 
-    fun generateAncestors(person: IPerson, depth: Int) {
-        if (depth <= 0) return
-        val parent1 = randomMale().also {
-            it.nameLast = person.nameLast
-            generateAncestors(it, depth - 1)
-        }
-        val parent2 = randomFemale().also {
-            generateAncestors(it, depth - 1)
-        }
-        val union = Union(parent1, parent2).also {
-            it.children += person
-        }
-        person.parentUnion = union
-        parent1.union = union
-        parent2.union = union
-    }
+        union.children += person
 
-    fun generateDescendants(parent1: IPerson.Male, parent2: IPerson.Female, depth: Int) {
-        if (depth <= 0) return
-        val union = Union(parent1, parent2)
-        parent1.union = union
-        parent2.union = union
-
-        union.apply {
-            repeat(randChildCount()) {
-                children += randomUnisex().apply {
-                    nameLast = parent1.nameLast
-                    parentUnion = union
+        if (shouldGenCousins) {
+            repeat(randomPersonProvider.randChildCount() - 1) {
+                union.children += randomPersonProvider.randomUnisex().also {
+                    it.nameLast = person.nameLast
+                    it.parentUnion = union
+                    generateDescendants(it, false, depth)
                 }
             }
         }
 
-        union.children.forEach { this.generateDescendants(it, depth) }
+        union.children.forEach { it.parentUnion = union }
     }
 
-    private fun randChildCount(): Int {
-        // output (1d2-1)+(1d2-1)+(1d3-1)
-        // https://anydice.com
-        // 2 is most common. Between [0, 4]
-        return (abs(random.nextInt()) % 2) +
-                (abs(random.nextInt()) % 2) +
-                (abs(random.nextInt()) % 3)
-    }
-
-    fun generateDescendants(person: IPerson, depth: Int) {
-        val params = if (shouldGenInLawFamily) {
-            WithFamily(depth - 1)
-        } else {
-            Default
+    fun generateDescendants(
+        person: IPerson,
+        shouldGenInlaws: Boolean,
+        depth: Int,
+    ) {
+        if (depth <= 0) return
+        val union = when (person) {
+            is IPerson.Male -> person.formUnion(randomPersonProvider.randomFemale().apply {
+                if (shouldGenInlaws) {
+                    generateAncestors(this, false, depth)
+                }
+            })
+            is IPerson.Female -> person.formUnion(randomPersonProvider.randomMale().apply {
+                if (shouldGenInlaws) {
+                    generateAncestors(this, false, depth)
+                }
+            })
+            else -> throw Exception("Needs to be a gender.")
         }
-        when (person) {
-            is IPerson.Male -> generateDescendants(
-                person,
-                randomFemale(params),
-                depth - 1
-            )
-            is IPerson.Female -> generateDescendants(
-                randomMale(params),
-                person,
-                depth - 1
-            )
-            else -> throw Exception("Needs to be a gender")
-        }
-    }
 
-    sealed class RandPersonParams {
-        object Default : RandPersonParams()
-        class WithFamily(val depth: Int) : RandPersonParams()
+        repeat(randomPersonProvider.randChildCount()) {
+            union.children += randomPersonProvider.randomUnisex().also {
+                it.nameLast = union.parent1.nameLast
+                it.parentUnion = union
+            }
+        }
+
+        union.children.forEach {
+            generateDescendants(it, shouldGenInlaws, depth - 1)
+        }
     }
 }
