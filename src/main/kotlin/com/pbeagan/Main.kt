@@ -32,10 +32,9 @@ fun main() {
                 nameLast = "ME"
             )
         ),
-        ancestorDepth = 4,
-        descendantDepth = 4,
-        graphDepth = 20,
-        shouldGenCousins = false,
-        shouldGenInlaws = false
+        ancestorDepth = 3,
+        descendantDepth = 3,
+        shouldGenCousins = true,
+        shouldGenInlaws = true
     ))
 }

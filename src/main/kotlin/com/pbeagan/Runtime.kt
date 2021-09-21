@@ -19,7 +19,7 @@ class Runtime(
         }
 
         fileManager.writeToFile(
-            printer.generateGraph(sourcePerson, graphDepth),
+            printer.generateGraph(sourcePerson, maxOf(ancestorDepth, descendantDepth)),
             File("family.dot")
         )
 
@@ -30,7 +30,6 @@ class Runtime(
         val sourcePerson: IPerson,
         val ancestorDepth: Int,
         val descendantDepth: Int,
-        val graphDepth: Int,
         val shouldGenCousins: Boolean,
         val shouldGenInlaws: Boolean,
     )
