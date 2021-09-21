@@ -40,7 +40,7 @@ The person ids ensure that they are unique within the graph. Otherwise, there is
 
 ### Why is there so much output?
 
-Right now I have it set up to generate a couple of ancestors for people that marry into the family later on. This helps make it seem less like they are popping up out of nowhere. You can disable this by flipping the [`shouldGenInLawFamily`](https://github.com/patbeagan1/FamilyTreeGenerator/blob/82269a7fb58675a764a3ca65aa150acfdd83d315/src/main/kotlin/com/pbeagan/providers/PersonProvider.kt#L17) toggle in the injected [PersonProvider](https://github.com/patbeagan1/FamilyTreeGenerator/blob/82269a7fb58675a764a3ca65aa150acfdd83d315/src/main/kotlin/com/pbeagan/Main.kt#L21)
+Right now I have it set up to generate a couple of ancestors for people that marry into the family later on, and generate some descendants for generated ancestors. This helps make it seem less like they are popping up out of nowhere. You can disable this by changing the values that are injected into `Runtime`. 
 
 These demos show the difference:
 || Without Inlaws | With Inlaws |
