@@ -62,6 +62,4 @@ I put this together for fun, and don't plan on maintaining it regularly. If you 
 
 ### Contributing
 
-- Reach out to me before doing refactors / adding features. 
-- Documentation and test PRs are welcome anytime!
-- File an issue before submitting a bug PR.
+Check the [contribution guidelines](CONTRIBUTING.md)
